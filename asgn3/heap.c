@@ -49,7 +49,7 @@ void fix_heap(Stats *stats, uint32_t *A, uint32_t first, uint32_t last) {
 
 void build_heap(Stats *stats, uint32_t *A, uint32_t first, uint32_t last) {
 
-    for (uint32_t father = last; father > first - 1; father = father - 1) {
+    for (uint32_t father = last / 2; father > first - 1; father = father - 1) {
 
         fix_heap(stats, A, father, last);
     }
