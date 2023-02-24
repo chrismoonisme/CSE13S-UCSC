@@ -342,25 +342,28 @@ void make_prime(mpz_t p, uint64_t bits, uint64_t iters){
   
   randstate_init(time(NULL));
   
+  //get a random number from 0 - 2^bits -1
+  mpz_urandomb(guess, state, bits);
   
-  while(is_prime(guess, iters) == false){
-  
-    //get a random number from 0 - 2^bits -1
-    mpz_urandomb(guess, state, bits);
-    
-    if(mpz_cmp(guess, lower) < 0){
-      //add 2^(bits-1)
-      mpz_add(guess, lower, guess);
-    
-    }
+  //if the guess is too low, add bits
+  if(mpz_cmp(guess, lower) < 0){
+    //add 2^(bits-1)
+    mpz_add(guess, lower, guess);
     
   }
   
-  is_prime(guess, iters);
+  //while not prime, add 1
+  while(is_prime(guess, iters) == false){
+  
+    mpz_add_ui(guess, guess, 1);
+    
+  }
   
   mpz_set(p, guess);
   
   mpz_clears(guess, lower, two, NULL);
+  
+  randstate_clear();
 
 }
 
