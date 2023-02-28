@@ -4,18 +4,14 @@
 
 gmp_randstate_t state;
 
-void randstate_init(uint64_t seed){
+void randstate_init(uint64_t seed) {
 
-	gmp_randinit_mt(state);
-	
-	gmp_randseed_ui(state, seed);
-	
-	
+    gmp_randinit_mt(state);
+
+    gmp_randseed_ui(state, seed);
 }
 
-void randstate_clear(void){
+void randstate_clear(void) {
 
-	gmp_randclear(state);
-
+    gmp_randclear(state);
 }
-
