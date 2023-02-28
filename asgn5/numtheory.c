@@ -125,7 +125,7 @@ void mod_inverse(mpz_t o, const mpz_t a, const mpz_t n){
   //else set to 0
   if(mpz_cmp_ui(r, 1) > 0){
 	
-    gmp_printf("no inverse\n");
+    //gmp_printf("no inverse\n");
 	
     mpz_set_ui(o, 0);
 		
@@ -219,8 +219,6 @@ bool is_prime(const mpz_t n, uint64_t iters){
   mpz_t r;
   mpz_init(r);
   mpz_sub_ui(r,n ,1);
-  mpz_t rmod;
-  mpz_init(rmod);
   
   //-- variables --
   //a is used to store the result of urandomm
@@ -263,21 +261,35 @@ bool is_prime(const mpz_t n, uint64_t iters){
   mpz_init(s1);
   mpz_sub_ui(s1, s, 1);
   
+  mpz_t temp;
+  mpz_init(temp);
+  mpz_set(temp, n);
+  
   //-- loop from 1 to iterations --
   for(uint64_t i = 1; i < iters; i++){
   
     //-- select a random number from 2 to n-2 --
     //initialize the random state using the time
-    randstate_init(time(NULL));
+    //randstate_init(time(NULL));
     
     //generate a number from 0 to (n-3) -1 using urandomm
-    mpz_urandomm(a, state, n3);
+    //mpz_urandomm(a, state, n3);
     
     //add 2 to a, making the resulting number in the range 2 to n- 1
+    //mpz_add_ui(a, a, 2);
+    
+    //get number from a really big range
+    mpz_urandomb(a, state, 1000);
+    
+    //a % (n - 2) + 2 to fix bounds
+    mpz_sub_ui(temp, temp, 2);
+    
+    mpz_mod(a, a, temp);
+    
     mpz_add_ui(a, a, 2);
     
     //-- set y to power mod --
-    mpz_powm(y, a, r, n);
+    pow_mod(y, a, r, n);
     
     //-- if y is not 1 and y is not n - 1 --
     //0 means x and y are equal
@@ -290,14 +302,15 @@ bool is_prime(const mpz_t n, uint64_t iters){
       while(mpz_cmp(j, s1) <= 0 && mpz_cmp(y, n1) != 0 ){
       
         //set y to pow mod(y,2,n)
-        mpz_powm(y, y, two, n);
+        pow_mod(y, y, two, n);
         
         //-- if the new y is 1, return false
         if(mpz_cmp_ui(y, 1) == 0){
           
           //clear mpz types
-          mpz_clears(s, a, y, r, j, n3, n1, s1, NULL);
-
+          mpz_clears(temp, s, a, y, r, j, n3, n1, s1, NULL);
+          
+          //printf("y=1\n");
           return false;
         
         }
@@ -311,8 +324,8 @@ bool is_prime(const mpz_t n, uint64_t iters){
       if(mpz_cmp(y, n1) != 0){
       
         //clear mpz types
-        mpz_clears(s, a, y, r, j, n3, n1, s1, NULL);
-
+        mpz_clears(temp, s, a, y, r, j, n3, n1, s1, two, NULL);
+        //printf("y not n-1\n");
         return false;
       
       }
@@ -321,7 +334,7 @@ bool is_prime(const mpz_t n, uint64_t iters){
   
   }
   
-  mpz_clears(s, a, y, r, j, n3, n1, s1, NULL);
+  mpz_clears(temp, s, a, y, r, j, n3, n1, s1, two, NULL);
   return true;
   
 }
@@ -329,42 +342,53 @@ bool is_prime(const mpz_t n, uint64_t iters){
 //make prime
 void make_prime(mpz_t p, uint64_t bits, uint64_t iters){
 
-  mpz_t guess;
-  mpz_init(guess);
-  mpz_set_ui(guess, 1);
-  
-  //lower = n^bits-1
+  //variables
   mpz_t lower;
-  mpz_init(lower);
+  mpz_t guess; 
   mpz_t two;
+  mpz_inits(lower, guess, two, NULL);
+  
   mpz_set_ui(two, 2);
+
+  //lower = 2 ^ (bits -1)
   mpz_pow_ui(lower, two, bits-1);
+
+  //initialize state
+  //randstate_init(time(NULL));
   
-  randstate_init(time(NULL));
-  
-  //get a random number from 0 - 2^bits -1
+  //get random value from 0 to 2^bits - 1
   mpz_urandomb(guess, state, bits);
   
-  //if the guess is too low, add bits
+  //if num is less than the lower bound, then add the lower bound 
   if(mpz_cmp(guess, lower) < 0){
     //add 2^(bits-1)
     mpz_add(guess, lower, guess);
     
   }
   
-  //while not prime, add 1
-  while(is_prime(guess, iters) == false){
+  //gmp_printf("end guess is %Zd\n", guess);
+
+  bool prime = false;
   
+  //while number is not prime, add 1
+  while (prime == false){
+  
+    prime = is_prime(guess, iters);
+    
     mpz_add_ui(guess, guess, 1);
     
+    //gmp_printf("new guess is %Zd\n", guess);
+    
   }
+
+  mpz_sub_ui(p, guess, 1);
   
-  mpz_set(p, guess);
+  mpz_clears(lower, guess, two, NULL);
   
-  mpz_clears(guess, lower, two, NULL);
-  
-  randstate_clear();
+  //randstate_clear();
 
 }
+
+
 
 
