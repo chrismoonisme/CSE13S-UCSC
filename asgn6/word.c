@@ -65,6 +65,14 @@ Word *word_append_sym(Word *w, uint8_t sym){
 //delete a word
 void word_delete(Word *w){
 
+  if(w->syms != NULL){
+  
+    free(w->syms);
+    
+    w= NULL;
+  
+  }
+  
   free(w);
   
   w = NULL;
@@ -104,7 +112,12 @@ void wt_delete(WordTable *wt){
 
   for(int i = 0; i < MAX_CODE; i++){
   
-    word_delete(wt[i]);
+    if(wt[i] != NULL){
+    
+      word_delete(wt[i]);
+      wt[i] = NULL;
+    
+    }
     
   }
   

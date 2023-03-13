@@ -82,6 +82,8 @@ void read_header(int infile, FileHeader *header){
     
   }
   
+  total_bits += sizeof(FileHeader);
+  
 }
 
 //WRITE HEADER
@@ -96,6 +98,8 @@ void write_header(int outfile, FileHeader *header){
   }
   
   write_bytes(outfile, (uint8_t *)header, sizeof(FileHeader) );
+  
+  total_bits += sizeof(FileHeader);
   
 }
 
@@ -125,6 +129,8 @@ bool read_sym(int infile, uint8_t *sym){
       c = 0;
     
     }
+    
+    total_syms++;
     
     if(c == end){
     
@@ -216,9 +222,11 @@ void flush_pairs(int outfile){
   
   if(b != 0){
     
-    write_bytes(outfile, bbuf, convert(b));
+    int add  = write_bytes(outfile, bbuf, convert(b));
+    total_bits += add;
   
   }
+  
 
 }
 
@@ -234,8 +242,8 @@ bool read_pair(int infile, uint16_t *code, uint8_t *sym, int bitlen){
     //read when empty
     if(b == 0){
       
-      read_bytes(infile, bbuf, BLOCK);
-    
+      int add = read_bytes(infile, bbuf, BLOCK);
+      total_bits += add;
     }
     
     //check if bit i of code is set or not
@@ -268,7 +276,8 @@ bool read_pair(int infile, uint16_t *code, uint8_t *sym, int bitlen){
     //read when empty
     if(b == 0){
       
-      read_bytes(infile, bbuf, BLOCK);
+      int add = read_bytes(infile, bbuf, BLOCK);
+      total_bits += add;
     
     }
     
@@ -296,6 +305,7 @@ bool read_pair(int infile, uint16_t *code, uint8_t *sym, int bitlen){
   
   }
   
+  
   if(*code == STOP_CODE){
   
     return false;
@@ -315,6 +325,8 @@ void write_word(int outfile, Word *w){
     
     c++;
     
+    total_syms++;
+    
     if(c == BLOCK){
     
       write_bytes(outfile, cbuf, BLOCK);
@@ -333,6 +345,7 @@ void flush_words(int outfile){
   if(c > 0){
     
     write_bytes(outfile, cbuf, c);
+    total_syms++;
   
   }
 

@@ -187,6 +187,18 @@ int main(int argc, char **argv) {
   
   flush_pairs(outfile);
   
+  if(v == 1){
+  
+    double saved = 100 * (1.0 - ( (double) total_bits / (double) (total_syms-1)));
+    
+    printf("Compressed file size = %lu bits.\n", total_bits);
+    
+    printf("Compressed file size = %lu bits.\n", total_syms-1);
+    
+    printf("Compression ration = %.2f%%\n", saved);
+  
+  }
+  
   close(infile);
   
   close(outfile);

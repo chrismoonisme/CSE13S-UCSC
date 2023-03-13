@@ -53,7 +53,7 @@ void trie_node_delete(TrieNode *n){
 TrieNode *trie_create(void){
   
   //run the constructor function
-  TrieNode *root = trie_node_create(START_CODE);
+  TrieNode *root = trie_node_create(EMPTY_CODE);
   
   return root;
 
